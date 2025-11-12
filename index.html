@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Processo Seletivo de Monitoria - Candidato</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- jsPDF para gerar o PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f4f6fb; --card:#fff; --text:#1c2430; --muted:#5f6b7a;
+      --primary:#0b5bd3; --primary-2:#0847a4;
+      --ok:#27ae60; --warn:#e67e22;
+      --shadow:0 10px 30px rgba(0,0,0,.06); --r:14px; --border:#e6ecf6;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);padding:22px}
+    .wrap{max-width:1100px;margin:0 auto;background:var(--card);box-shadow:var(--shadow);border-radius:var(--r);padding:22px 22px 30px}
+    h1{font-size:1.6rem;text-align:center;margin-bottom:8px}
+    .muted{color:var(--muted);font-size:.92rem;text-align:center}
+
+    .steps{display:flex;gap:10px;margin:16px 0 20px;flex-wrap:wrap}
+    .step{flex:1;min-width:130px;background:#eef3fb;border-radius:999px;text-align:center;padding:8px 10px;font-weight:700;font-size:.8rem;color:#384a60}
+    .step.active{background:var(--primary);color:#fff}
+    .form-step{display:none;animation:fade .25s ease}
+    .form-step.active{display:block}
+    @keyframes fade{from{opacity:.3;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:980px){.grid-2{grid-template-columns:1fr 1fr}}
+    .card{background:#fbfdff;border:1px solid var(--border);border-radius:12px;padding:16px}
+
+    .form-group{margin-bottom:14px}
+    label{display:block;font-weight:600;margin-bottom:6px}
+    input[type="text"],input[type="email"],select,textarea{
+      width:100%;padding:12px;border:1px solid #dce3ef;border-radius:10px;background:#fff;font-size:1rem;transition:.2s
+    }
+    textarea{min-height:110px}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(11,91,211,.12)}
+    .radio-inline{display:flex;gap:16px;flex-wrap:wrap}
+    .radio-inline label{display:flex;align-items:center;gap:8px;font-weight:500}
+
+    .questions{border:1px solid var(--border);border-radius:12px;background:#fff;padding:12px}
+    .question{border:1px solid #eef2f8;border-left:5px solid var(--primary);border-radius:10px;padding:12px;margin-bottom:12px;background:#fcfdff}
+    .question p{font-weight:700;margin-bottom:8px}
+    .disc-histologia .question{border-left-color:#00796b}
+    .disc-micro .question{border-left-color:#4caf50}
+    .disc-farma .question{border-left-color:#5e35b1}
+
+    .pill{display:inline-block;background:#eef3ff;color:#19345e;border:1px solid #cfe0ff;border-radius:999px;padding:4px 8px;font-size:.8rem;font-weight:700}
+    .timer{display:flex;align-items:center;gap:10px;margin:6px 0 12px;flex-wrap:wrap}
+    .timer .clock{font-weight:800;font-size:1.1rem}
+    .progress{height:10px;background:#e8eef9;border-radius:999px;overflow:hidden}
+    .progress > span{display:block;height:100%;width:0;background:linear-gradient(90deg,#0b5bd3,#26a0ff);transition:width .25s}
+    .progress-label{font-size:.85rem;color:#42546a;margin-top:6px}
+
+    .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+    .btn{border:none;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.2s;flex:1 1 220px}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:var(--primary-2)}
+    .btn-ghost{background:#edf2fb;color:#1e2a3a}
+    .btn-warn{background:var(--warn);color:#fff}
+
+    .final-grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:980px){.final-grid{grid-template-columns:2fr 1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>PROCESSO SELETIVO DE MONITORIA</h1>
+    <p class="muted">Aplicativo exclusivo do candidato. No final, gere o PDF com dados, respostas e gabarito comparado.</p>
+
+    <div class="steps">
+      <div class="step active" data-step="1">1 Dados</div>
+      <div class="step" data-step="2">2 Motivação</div>
+      <div class="step" data-step="3">3 Disciplina</div>
+      <div class="step" data-step="4">4 Prova</div>
+      <div class="step" data-step="5">5 PDF</div>
+    </div>
+
+    <form id="form-candidato" onsubmit="return false">
+      <!-- Passo 1 -->
+      <section class="form-step active" data-form-step="1">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="form-group">
+              <label for="c-nome">Nome completo</label>
+              <input id="c-nome" name="nome" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="c-mat">Nº de matrícula</label>
+              <input id="c-mat" name="matricula" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="c-email">E-mail</label>
+              <input id="c-email" name="email" type="email" />
+            </div>
+          </div>
+          <div class="card">
+            <div class="form-group">
+              <label for="c-disp">Disponibilidade semanal</label>
+              <select id="c-disp" name="disponibilidade">
+                <option value="4h">4 horas</option>
+                <option value="8h">8 horas</option>
+                <option value="12h">12 horas</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Participa de outro projeto?</label>
+              <div class="radio-inline">
+                <label><input type="radio" name="outro_projeto" value="Sim" />Sim</label>
+                <label><input type="radio" name="outro_projeto" value="Não" checked />Não</label>
+              </div>
+            </div>
+            <div class="form-group" id="c-projeto-box" style="display:none">
+              <label for="c-projeto">Qual projeto?</label>
+              <input id="c-projeto" type="text" placeholder="Ex.: PIBIC, PROBEX, Liga..." />
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary" data-next>Próximo</button>
+        </div>
+      </section>
+
+      <!-- Passo 2 -->
+      <section class="form-step" data-form-step="2">
+        <div class="card">
+          <div class="form-group">
+            <label for="c-motivo">Por que quer ser monitor?</label>
+            <textarea id="c-motivo"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="c-metodologia">Que metodologia docente mais ajuda você?</label>
+            <textarea id="c-metodologia" placeholder="Ex.: aula invertida, TBL, PBL, estudo de caso, práticas..."></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
+          <button type="button" class="btn btn-primary" data-next>Próximo</button>
+        </div>
+      </section>
+
+      <!-- Passo 3 -->
+      <section class="form-step" data-form-step="3">
+        <div class="card">
+          <div class="form-group">
+            <label for="c-disc">Disciplina pretendida</label>
+            <select id="c-disc" required>
+              <option value="">Selecione...</option>
+              <option value="histologia">Histologia</option>
+              <option value="microbiologia">Microbiologia</option>
+              <option value="farmacologia">Farmacologia</option>
+            </select>
+          </div>
+          <p class="muted">As questões objetivas serão carregadas no próximo passo conforme a disciplina.</p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
+          <button type="button" id="btn-carregar-questoes" class="btn btn-primary" data-next>Próximo</button>
+        </div>
+      </section>
+
+      <!-- Passo 4 -->
+      <section class="form-step" data-form-step="4">
+        <div class="card">
+          <div class="timer">
+            <span class="pill">Tempo da prova</span>
+            <span id="clock" class="clock">--:--</span>
+            <button type="button" id="btn-iniciar" class="btn btn-primary">Iniciar</button>
+            <button type="button" id="btn-encerrar" class="btn btn-warn" disabled>Encerrar</button>
+          </div>
+          <div class="progress"><span id="progress-bar"></span></div>
+          <div class="progress-label"><span id="progress-text">0/0 respondidas</span></div>
+        </div>
+
+        <div id="questoes-box" class="questions"></div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
+          <button type="button" id="btn-avancar-final" class="btn btn-primary" data-next disabled>Avançar</button>
+        </div>
+      </section>
+
+      <!-- Passo 5 -->
+      <section class="form-step" data-form-step="5">
+        <div class="final-grid">
+          <div class="card">
+            <h3 style="margin-bottom:8px">Revisar</h3>
+            <p class="muted">Confira seus dados. O gabarito não aparece aqui e será incluído no PDF.</p>
+            <div class="sep" style="height:1px;background:var(--border);margin:12px 0"></div>
+            <div id="resumo"></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:8px">Gerar PDF</h3>
+            <p class="muted">O PDF inclui dados, respostas, gabarito e total de acertos.</p>
+            <div class="actions" style="margin-top:10px">
+              <button type="button" class="btn btn-primary" id="btn-gerar-pdf">Baixar PDF</button>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <script>
+    // ===== Passos =====
+    const steps = document.querySelectorAll('.step');
+    const formSteps = document.querySelectorAll('[data-form-step]');
+    let current = 1;
+    function showStep(n){
+      formSteps.forEach(s=>s.classList.remove('active'));
+      document.querySelector(`[data-form-step="${n}"]`).classList.add('active');
+      steps.forEach(s=>s.classList.remove('active'));
+      document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
+      current=n;
+      if(n===5){ buildResumo(); }
+    }
+    document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click', ()=>showStep(current+1)));
+    document.querySelectorAll('[data-prev]').forEach(b=>b.addEventListener('click', ()=>showStep(current-1)));
+
+    // Campo projeto
+    document.querySelectorAll('input[name="outro_projeto"]').forEach(r=>{
+      r.addEventListener('change', e=>{
+        document.getElementById('c-projeto-box').style.display = e.target.value==='Sim' ? 'block':'none';
+        if(e.target.value!=='Sim') document.getElementById('c-projeto').value='';
+      });
+    });
+
+    // ===== Banco de Questões Mais Fáceis (10 por disciplina, 100% objetivas) =====
+    const BANK = {
+      histologia:{
+        title:'Histologia', cls:'disc-histologia',
+        items:[
+          {id:'H1', en:'Qual tecido reveste superfícies internas e externas do corpo?', op:['Epitelial','Conjuntivo','Muscular','Nervoso'], correta:'Epitelial'},
+          {id:'H2', en:'Qual é a principal célula produtora de fibras no tecido conjuntivo?', op:['Fibroblasto','Macrófago','Mastócito','Plasmócito'], correta:'Fibroblasto'},
+          {id:'H3', en:'A hematoxilina cora mais intensamente qual estrutura?', op:['Núcleo','Citoplasma','Membrana plasmática','Matriz extracelular'], correta:'Núcleo'},
+          {id:'H4', en:'A lâmina basal fica localizada entre:', op:['Epitélio e tecido conjuntivo','Dois neurônios','Dois osteócitos','Sarcômero e miofibrila'], correta:'Epitélio e tecido conjuntivo'},
+          {id:'H5', en:'A cartilagem é:', op:['Avascular','Altamente vascularizada','Irrigada por capilares no pericôndrio interno','Dependente de vasos dentro das lacunas'], correta:'Avascular'},
+          {id:'H6', en:'Célula responsável por formar a matriz óssea:', op:['Osteoblasto','Osteócito','Osteoclasto','Condrócito'], correta:'Osteoblasto'},
+          {id:'H7', en:'Microvilos servem para:', op:['Aumentar a superfície de absorção','Produzir contração','Conduzir impulsos nervosos','Armazenar gordura'], correta:'Aumentar a superfície de absorção'},
+          {id:'H8', en:'Epitélio simples possui:', op:['Uma camada de células','Duas camadas de células','Muitas camadas com queratina','Células fusiformes multinucleadas'], correta:'Uma camada de células'},
+          {id:'H9', en:'Função principal do tecido adiposo branco:', op:['Armazenar energia','Conduzir impulso nervoso','Formar sarcômeros','Revestir vasos'], correta:'Armazenar energia'},
+          {id:'H10', en:'O músculo estriado esquelético apresenta:', op:['Contração voluntária','Contração involuntária','Discos intercalares evidentes','Células ramificadas'], correta:'Contração voluntária'}
+        ]
+      },
+      microbiologia:{
+        title:'Microbiologia', cls:'disc-micro',
+        items:[
+          {id:'M1', en:'Após a coloração de Gram, bactérias Gram-positivas ficam:', op:['Roxas','Rosas','Incolores','Verdes'], correta:'Roxas'},
+          {id:'M2', en:'Esterilização significa:', op:['Destruir todas as formas de vida, incluindo esporos','Reduzir a carga microbiana','Usar antisséptico em pele','Usar filtro HEPA'], correta:'Destruir todas as formas de vida, incluindo esporos'},
+          {id:'M3', en:'Antisséptico é usado principalmente em:', op:['Tecidos vivos','Superfícies inanimadas','Instrumentos metálicos','Ar ambiente'], correta:'Tecidos vivos'},
+          {id:'M4', en:'Padrão clássico de autoclave:', op:['121 °C 15 psi por 15 min','100 °C por 5 min','134 °C por 1 min','160 °C por 2 h'], correta:'121 °C 15 psi por 15 min'},
+          {id:'M5', en:'MacConkey é um meio que seleciona principalmente:', op:['Bactérias Gram-negativas','Cocos Gram-positivos','Anaeróbios estritos apenas','Fungos'], correta:'Bactérias Gram-negativas'},
+          {id:'M6', en:'Endotoxina é parte do:', op:['LPS de Gram-negativas','Ácido teicoico de Gram-positivas','Peptidoglicano de Gram-positivas','Flagelo'], correta:'LPS de Gram-negativas'},
+          {id:'M7', en:'Escherichia coli é melhor classificada como:', op:['Bacilo Gram-negativo','Coco Gram-positivo','Coco Gram-negativo','Bacilo ácido-álcool resistente'], correta:'Bacilo Gram-negativo'},
+          {id:'M8', en:'Álcool 70% é eficaz porque:', op:['A presença de água facilita a desnaturação de proteínas','Evapora mais rápido que 96%','Age apenas como detergente','Não tem ação antisséptica'], correta:'A presença de água facilita a desnaturação de proteínas'},
+          {id:'M9', en:'Aeróbios estritos:', op:['Precisam de oxigênio para crescer','Crescem apenas sem oxigênio','São sempre esporulados','Vivem somente em biofilmes'], correta:'Precisam de oxigênio para crescer'},
+          {id:'M10', en:'Biofilme é:', op:['Comunidade aderida envolta em matriz extracelular','Cultura pura em caldo','Fase livre planctônica','Colônia isolada sem matriz'], correta:'Comunidade aderida envolta em matriz extracelular'}
+        ]
+      },
+      farmacologia:{
+        title:'Farmacologia', cls:'disc-farma',
+        items:[
+          {id:'F1', en:'Administração sublingual geralmente:', op:['Evita o efeito de primeira passagem','Sempre tem biodisponibilidade zero','É mais lenta que via oral','Exige dose de ataque'], correta:'Evita o efeito de primeira passagem'},
+          {id:'F2', en:'Biodisponibilidade é:', op:['Fração da dose que atinge a circulação sistêmica inalterada','Velocidade de dissolução do comprimido','Volume de distribuição','Ligação a proteínas plasmáticas'], correta:'Fração da dose que atinge a circulação sistêmica inalterada'},
+          {id:'F3', en:'Meia-vida de eliminação é o tempo para:', op:['Reduzir a concentração à metade','Absorver metade da dose','Dobrar a concentração plasmática','Atingir o pico plasmático'], correta:'Reduzir a concentração à metade'},
+          {id:'F4', en:'Receptor beta1 é predominante em:', op:['Coração','Pulmões apenas','Rins exclusivamente','Fígado'], correta:'Coração'},
+          {id:'F5', en:'Antagonista competitivo geralmente:', op:['Desloca a curva dose-resposta para a direita sem reduzir Emax','Reduz Emax sem deslocar a curva','Aumenta Emax','É irreversível por definição'], correta:'Desloca a curva dose-resposta para a direita sem reduzir Emax'},
+          {id:'F6', en:'Dose de ataque serve para:', op:['Alcançar rapidamente concentrações terapêuticas','Diminuir ligações proteicas','Evitar efeitos adversos','Reduzir metabolismo hepático'], correta:'Alcançar rapidamente concentrações terapêuticas'},
+          {id:'F7', en:'Administração intravenosa tem biodisponibilidade aproximada de:', op:['100%','50%','0%','Depende sempre do alimento'], correta:'100%'},
+          {id:'F8', en:'Agonista parcial:', op:['Tem menor eficácia que agonista pleno','Não tem afinidade por receptor','Sempre bloqueia receptores','Aumenta obrigatoriamente Emax'], correta:'Tem menor eficácia que agonista pleno'},
+          {id:'F9', en:'Efeito de primeira passagem ocorre principalmente em:', op:['Fígado','Coração','Músculo esquelético','Pulmão'], correta:'Fígado'},
+          {id:'F10', en:'Penicilinas atuam principalmente em:', op:['Síntese da parede celular','Síntese de DNA','Síntese proteica 30S','Canal de cálcio'], correta:'Síntese da parede celular'}
+        ]
+      }
+    };
+
+    // Duração por disciplina (minutos)
+    const TEMPO_MIN = { histologia:20, microbiologia:20, farmacologia:20 };
+
+    // ===== Carregar questões =====
+    const btnCarregar = document.getElementById('btn-carregar-questoes');
+    btnCarregar.addEventListener('click', loadQuestions);
+    const questoesBox = document.getElementById('questoes-box');
+
+    let totalQuestions=0, answered=0;
+    let remainingSec=0, timerId=null, tempoPrevistoMin=0, tempoGastoSeg=0;
+    const clockEl = document.getElementById('clock');
+    const btnStart = document.getElementById('btn-iniciar');
+    const btnEnd = document.getElementById('btn-encerrar');
+    const btnAvancarFinal = document.getElementById('btn-avancar-final');
+    const pgBar = document.getElementById('progress-bar');
+    const pgText = document.getElementById('progress-text');
+
+    function loadQuestions(){
+      const disc = document.getElementById('c-disc').value;
+      questoesBox.innerHTML = '';
+      questoesBox.className = 'questions';
+      if(!disc || !BANK[disc]){ questoesBox.innerHTML = '<p class="muted">Selecione uma disciplina.</p>'; return; }
+      const data = BANK[disc];
+      questoesBox.classList.add(data.cls);
+      const h = document.createElement('h3'); h.textContent = `Questões de ${data.title}`; questoesBox.appendChild(h);
+
+      data.items.forEach((q)=>{
+        const qDiv = document.createElement('div'); qDiv.className='question';
+        const p = document.createElement('p'); p.textContent = `${q.id}) ${q.en}`; qDiv.appendChild(p);
+        const opts = [...q.op];
+        for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+        opts.forEach(opt=>{
+          const label = document.createElement('label');
+          const r = document.createElement('input'); r.type='radio'; r.name=q.id; r.value=opt; r.addEventListener('change', updateProgress);
+          label.appendChild(r); label.appendChild(document.createTextNode(' '+opt));
+          qDiv.appendChild(label);
+        });
+        questoesBox.appendChild(qDiv);
+      });
+
+      totalQuestions = data.items.length;
+      answered = 0; updateProgress();
+      prepareTimerFor(disc);
+      btnAvancarFinal.disabled = true; // libera só após encerrar
+    }
+
+    // ===== Timer e progresso =====
+    function formatTime(s){const m=Math.floor(s/60).toString().padStart(2,'0'); const ss=(s%60).toString().padStart(2,'0'); return `${m}:${ss}`;}
+    function prepareTimerFor(disc){
+      tempoPrevistoMin = TEMPO_MIN[disc] || 20;
+      remainingSec = tempoPrevistoMin*60;
+      tempoGastoSeg = 0;
+      clockEl.textContent = formatTime(remainingSec);
+      btnStart.disabled=false; btnEnd.disabled=true;
+      enableQuestions(true);
+    }
+    btnStart.addEventListener('click', ()=>{
+      if(timerId) clearInterval(timerId);
+      btnStart.disabled=true; btnEnd.disabled=false;
+      timerId=setInterval(()=>{
+        remainingSec--; tempoGastoSeg++;
+        clockEl.textContent=formatTime(remainingSec);
+        if(remainingSec<=0){ stopTimer(); finalizeExam('Tempo esgotado. Respostas bloqueadas.'); }
+      },1000);
+    });
+    btnEnd.addEventListener('click', ()=>{ stopTimer(); finalizeExam('Prova encerrada.'); });
+    function stopTimer(){ if(timerId){ clearInterval(timerId); timerId=null; } }
+    function finalizeExam(msg){ btnEnd.disabled=true; btnStart.disabled=true; enableQuestions(false); alert(msg); btnAvancarFinal.disabled=false; }
+    function enableQuestions(enable){ document.querySelectorAll('#questoes-box input[type="radio"]').forEach(el=>{el.disabled=!enable;}); }
+    function updateProgress(){
+      const disc = document.getElementById('c-disc').value;
+      if(!disc||!BANK[disc]) return;
+      const items=BANK[disc].items;
+      answered=items.reduce((acc,q)=> acc + (document.querySelector(`input[name="${q.id}"]:checked`)?1:0), 0);
+      pgText.textContent=`${answered}/${totalQuestions} respondidas`;
+      const pct = totalQuestions?Math.round((answered/totalQuestions)*100):0;
+      pgBar.style.width = pct+'%';
+    }
+
+    // ===== Coleta e resumo =====
+    function getFormData(){
+      const nome = document.getElementById('c-nome').value.trim();
+      const matricula = document.getElementById('c-mat').value.trim();
+      const email = document.getElementById('c-email').value.trim();
+      const disponibilidade = document.getElementById('c-disp').value;
+      const outro = (document.querySelector('input[name="outro_projeto"]:checked')||{}).value || '';
+      const desc_projeto = document.getElementById('c-projeto').value.trim();
+      const motivo = document.getElementById('c-motivo').value.trim();
+      const metodologia = document.getElementById('c-metodologia').value.trim();
+      const disciplina = document.getElementById('c-disc').value;
+      const respostas = [];
+      if(disciplina && BANK[disciplina]){
+        BANK[disciplina].items.forEach(q=>{
+          const el = document.querySelector(`input[name="${q.id}"]:checked`);
+          respostas.push({id:q.id, enunciado:q.en, resposta:el?el.value:''});
+        });
+      }
+      return {nome,matricula,email,disponibilidade,outro_projeto:outro,desc_projeto,motivo,metodologia,disciplina,
+              respostas, tempoPrevistoMin, tempoGastoSeg, ts:new Date().toISOString()};
+    }
+    function buildResumo(){
+      const d = getFormData();
+      const el = document.getElementById('resumo');
+      el.innerHTML =
+        `<p><strong>Nome:</strong> ${d.nome||'-'}</p>
+         <p><strong>Matrícula:</strong> ${d.matricula||'-'}</p>
+         <p><strong>E-mail:</strong> ${d.email||'-'}</p>
+         <p><strong>Disciplina:</strong> ${d.disciplina||'-'}</p>
+         <p><strong>Disponibilidade:</strong> ${d.disponibilidade||'-'}</p>
+         <p><strong>Outro projeto:</strong> ${d.outro_projeto==='Sim' ? ('Sim - '+(d.desc_projeto||'-')) : 'Não'}</p>
+         <p><strong>Tempo previsto:</strong> ${d.tempoPrevistoMin||0} min</p>
+         <p><strong>Tempo decorrido:</strong> ${Math.max(0,Math.floor((d.tempoGastoSeg||0)/60))} min</p>`;
+    }
+
+    // ===== PDF com gabarito =====
+    document.getElementById('btn-gerar-pdf').addEventListener('click', ()=>{
+      const { jsPDF } = window.jspdf;
+      const d = getFormData();
+      const bank = d.disciplina ? BANK[d.disciplina] : null;
+
+      const doc = new jsPDF({unit:'pt', format:'a4'});
+      let y=50; doc.setFontSize(14); doc.text('Processo Seletivo de Monitoria - Ficha do Candidato', 40, y); y+=18;
+      doc.setFontSize(10);
+      const line = t=>{doc.text(t, 40, y, {maxWidth:515}); y+=14;};
+      line('Data e hora: '+new Date().toLocaleString());
+      line('Nome: '+(d.nome||'-'));
+      line('Matrícula: '+(d.matricula||'-'));
+      line('E-mail: '+(d.email||'-'));
+      line('Disciplina: '+(d.disciplina||'-'));
+      line('Disponibilidade: '+(d.disponibilidade||'-'));
+      line('Outro projeto: '+(d.outro_projeto==='Sim' ? ('Sim - '+(d.desc_projeto||'-')) : 'Não'));
+      line('Tempo previsto: '+(d.tempoPrevistoMin||0)+' min');
+      line('Tempo decorrido: '+Math.max(0,Math.floor((d.tempoGastoSeg||0)/60))+' min');
+      y+=6; doc.setFontSize(12); doc.text('Respostas e gabarito',40,y); y+=10; doc.setFontSize(10);
+
+      let acertos=0;
+      if(bank){
+        bank.items.forEach((q,i)=>{
+          const resp=(d.respostas.find(r=>r.id===q.id)||{}).resposta||'-';
+          const ok = resp===q.correta ? '✔' : '✖';
+          doc.setFont(undefined,'bold'); doc.text(`${i+1}) ${q.en}`,40,y,{maxWidth:515}); y+=12; doc.setFont(undefined,'normal');
+          doc.text(`Gabarito: ${q.correta}`,48,y); y+=12;
+          doc.text(`Você: ${resp}   ${ok}`,48,y); y+=14;
+          if(ok==='✔') acertos++;
+          if(y>770){doc.addPage(); y=50;}
+        });
+      }
+      y+=4; doc.setFontSize(11); doc.text(`Total de acertos: ${acertos}/${bank?bank.items.length:0}`, 40, y);
+
+      doc.save(`monitoria-${d.matricula||'candidato'}.pdf`);
+    });
+
+    // Extras
+    document.getElementById('candidato')?.addEventListener('change', e=>{
+      if(current===5 && (e.target.type==='radio' || e.target.id==='c-disc')){ buildResumo(); }
+    });
+  </script>
+</body>
+</html>
