@@ -179,7 +179,8 @@
 
         <div class="actions">
           <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
-          <button type="button" id="btn-avancar-final" class="btn btn-primary" data-next disabled>Avançar</button>
+          <!-- Importante: sem data-next; handler explícito no JS -->
+          <button type="button" id="btn-avancar-final" class="btn btn-primary" disabled>Avançar</button>
         </div>
       </section>
 
@@ -219,6 +220,8 @@
       document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
       current=n;
       if(n===5){ buildResumo(); }
+      // rola para o topo para evitar confusão em mobile
+      window.scrollTo({top:0, behavior:'smooth'});
     }
     document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click', ()=>showStep(current+1)));
     document.querySelectorAll('[data-prev]').forEach(b=>b.addEventListener('click', ()=>showStep(current-1)));
@@ -290,6 +293,7 @@
 
     let totalQuestions=0, answered=0;
     let remainingSec=0, timerId=null, tempoPrevistoMin=0, tempoGastoSeg=0;
+    let provaEncerrada = false; // FLAG DE ESTADO
     const clockEl = document.getElementById('clock');
     const btnStart = document.getElementById('btn-iniciar');
     const btnEnd = document.getElementById('btn-encerrar');
@@ -323,7 +327,10 @@
       totalQuestions = data.items.length;
       answered = 0; updateProgress();
       prepareTimerFor(disc);
-      btnAvancarFinal.disabled = true; // libera só após encerrar
+
+      // reset do estado do passo 4
+      provaEncerrada = false;
+      btnAvancarFinal.disabled = true;
     }
 
     // ===== Timer e progresso =====
@@ -347,7 +354,13 @@
     });
     btnEnd.addEventListener('click', ()=>{ stopTimer(); finalizeExam('Prova encerrada.'); });
     function stopTimer(){ if(timerId){ clearInterval(timerId); timerId=null; } }
-    function finalizeExam(msg){ btnEnd.disabled=true; btnStart.disabled=true; enableQuestions(false); alert(msg); btnAvancarFinal.disabled=false; }
+    function finalizeExam(msg){
+      btnEnd.disabled=true; btnStart.disabled=true;
+      enableQuestions(false);
+      provaEncerrada = true;           // marca encerramento
+      btnAvancarFinal.disabled = false; // libera botão avançar
+      alert(msg);
+    }
     function enableQuestions(enable){ document.querySelectorAll('#questoes-box input[type="radio"]').forEach(el=>{el.disabled=!enable;}); }
     function updateProgress(){
       const disc = document.getElementById('c-disc').value;
@@ -358,6 +371,15 @@
       const pct = totalQuestions?Math.round((answered/totalQuestions)*100):0;
       pgBar.style.width = pct+'%';
     }
+
+    // Handler explícito para o botão "Avançar" do passo 4
+    btnAvancarFinal.addEventListener('click', ()=>{
+      if(!provaEncerrada){
+        alert('Finalize a prova para avançar.');
+        return;
+      }
+      showStep(5);
+    });
 
     // ===== Coleta e resumo =====
     function getFormData(){
@@ -430,11 +452,6 @@
       y+=4; doc.setFontSize(11); doc.text(`Total de acertos: ${acertos}/${bank?bank.items.length:0}`, 40, y);
 
       doc.save(`monitoria-${d.matricula||'candidato'}.pdf`);
-    });
-
-    // Extras
-    document.getElementById('candidato')?.addEventListener('change', e=>{
-      if(current===5 && (e.target.type==='radio' || e.target.id==='c-disc')){ buildResumo(); }
     });
   </script>
 </body>
