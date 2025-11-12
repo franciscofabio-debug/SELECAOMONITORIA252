@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Processo Seletivo de Monitoria – Candidato & Professor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- jsPDF (para gerar PDFs) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f4f6fb; --card:#fff; --text:#1c2430; --muted:#5f6b7a;
+      --primary:#0b5bd3; --primary-2:#0847a4;
+      --ok:#27ae60; --warn:#e67e22; --danger:#c0392b;
+      --shadow:0 10px 30px rgba(0,0,0,.06);
+      --r:14px;
+    }
+    *{box-sizing:border-box; margin:0; padding:0}
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);padding:22px}
+    .wrap{max-width:1100px;margin:0 auto;background:var(--card);box-shadow:var(--shadow);border-radius:var(--r);padding:22px 22px 30px}
+    h1{font-size:1.6rem;text-align:center;margin-bottom:10px}
+    h3{font-size:1.05rem}
+    .tabs{display:flex;gap:10px;justify-content:center;margin:10px 0 20px}
+    .tab{flex:1;max-width:260px;background:#e9eef8;border:none;border-radius:999px;padding:12px 16px;font-weight:700;cursor:pointer;color:#1e2a3a}
+    .tab.active{background:var(--primary);color:#fff}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:980px){.grid-2{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr 1fr 1fr}}
+    .card{background:#fbfdff;border:1px solid #e6ecf6;border-radius:12px;padding:16px}
+    .muted{color:var(--muted);font-size:.9rem}
+    .form-group{margin-bottom:14px}
+    label{display:block;font-weight:600;margin-bottom:6px}
+    input[type="text"],input[type="number"],input[type="email"],select,textarea{
+      width:100%;padding:12px;border:1px solid #dce3ef;border-radius:10px;background:#fff;font-size:1rem;
+      transition:.2s;
+    }
+    textarea{min-height:110px}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(11,91,211,.12)}
+    .radio-inline{display:flex;gap:16px;flex-wrap:wrap}
+    .radio-inline label{display:flex;align-items:center;gap:8px;font-weight:500}
+    .actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+    .btn{border:none;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:var(--primary-2)}
+    .btn-ghost{background:#edf2fb;color:#1e2a3a}
+    .btn-ok{background:var(--ok);color:#fff}
+    .btn-warn{background:var(--warn);color:#fff}
+    .btn-danger{background:var(--danger);color:#fff}
+    .steps{display:flex;gap:10px;margin:8px 0 16px}
+    .step{flex:1;background:#eef3fb;border-radius:999px;text-align:center;padding:8px 10px;font-weight:700;font-size:.8rem;color:#384a60}
+    .step.active{background:var(--primary);color:#fff}
+    .form-step{display:none;animation:fade .25s ease}
+    .form-step.active{display:block}
+    @keyframes fade{from{opacity:.3;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Questões */
+    .questions{border:1px solid #e6ecf6;border-radius:12px;background:#fff;padding:12px}
+    .question{border:1px solid #eef2f8;border-left:5px solid var(--primary);border-radius:10px;padding:12px;margin-bottom:12px;background:#fcfdff}
+    .question p{font-weight:700;margin-bottom:8px}
+    .disc-histologia .question{border-left-color:#00796b}
+    .disc-micro .question{border-left-color:#4caf50}
+    .disc-farma .question{border-left-color:#5e35b1}
+
+    /* Token + Professor */
+    .token-box, .paste-box{background:#f6f9ff;border:1px dashed #b9c9ff;border-radius:12px;padding:12px;font-family:ui-monospace,Menlo,Consolas,monospace}
+    .list{width:100%;border-collapse:collapse}
+    .list th,.list td{border-bottom:1px solid #e6ecf6;padding:10px;text-align:left;font-size:.95rem}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.8rem;font-weight:700}
+    .badge-ok{background:#eafaf0;color:#1e7e34}
+    .badge-warn{background:#fff4e6;color:#b15400}
+    .badge-danger{background:#fdeeee;color:#b21f2d}
+    .sep{height:1px;background:#e6ecf6;margin:10px 0}
+
+    /* Timer e progresso */
+    .timer{display:flex;align-items:center;gap:10px;margin:6px 0 12px}
+    .timer .clock{font-weight:800;font-size:1.1rem}
+    .progress{height:10px;background:#e8eef9;border-radius:999px;overflow:hidden}
+    .progress > span{display:block;height:100%;width:0;background:linear-gradient(90deg,#0b5bd3,#26a0ff);transition:width .25s}
+    .progress-label{font-size:.85rem;color:#42546a;margin-top:6px}
+    .pill{display:inline-block;background:#eef3ff;color:#19345e;border:1px solid #cfe0ff;border-radius:999px;padding:4px 8px;font-size:.8rem;font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>PROCESSO SELETIVO DE MONITORIA</h1>
+    <p class="muted" style="text-align:center">Arquivo único. Modo Candidato para preencher e gerar PDF + Token (com QR). Modo Professor para editar gabarito/pesos/tempo, avaliar tokens, ranquear e exportar relatório.</p>
+
+    <div class="tabs">
+      <button id="tab-candidato" class="tab active">Modo Candidato</button>
+      <button id="tab-professor" class="tab">Modo Professor</button>
+    </div>
+
+    <!-- MODO CANDIDATO -->
+    <section id="candidato">
+      <div class="steps">
+        <div class="step active" data-step="1">1 Dados</div>
+        <div class="step" data-step="2">2 Motivação</div>
+        <div class="step" data-step="3">3 Disciplina</div>
+        <div class="step" data-step="4">4 Prova</div>
+        <div class="step" data-step="5">5 Finalizar</div>
+      </div>
+
+      <form id="form-candidato">
+        <!-- Passo 1 -->
+        <div class="form-step active" data-form-step="1">
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="form-group">
+                <label for="c-nome">Nome completo</label>
+                <input id="c-nome" name="nome" type="text" required />
+              </div>
+              <div class="form-group">
+                <label for="c-mat">Nº de matrícula</label>
+                <input id="c-mat" name="matricula" type="text" required />
+              </div>
+              <div class="form-group">
+                <label for="c-email">E-mail</label>
+                <input id="c-email" name="email" type="email" />
+              </div>
+            </div>
+            <div class="card">
+              <div class="form-group">
+                <label for="c-disp">Disponibilidade semanal</label>
+                <select id="c-disp" name="disponibilidade">
+                  <option value="4h">4 horas</option>
+                  <option value="8h">8 horas</option>
+                  <option value="12h">12 horas</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Participa de outro projeto?</label>
+                <div class="radio-inline">
+                  <label><input type="radio" name="outro_projeto" value="Sim" />Sim</label>
+                  <label><input type="radio" name="outro_projeto" value="Não" checked />Não</label>
+                </div>
+              </div>
+              <div class="form-group" id="c-projeto-box" style="display:none">
+                <label for="c-projeto">Qual projeto?</label>
+                <input id="c-projeto" type="text" placeholder="Ex.: PIBIC, PROBEX, Liga..." />
+              </div>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" data-next>Próximo</button>
+          </div>
+        </div>
+
+        <!-- Passo 2 -->
+        <div class="form-step" data-form-step="2">
+          <div class="card">
+            <div class="form-group">
+              <label for="c-motivo">Por que quer ser monitor?</label>
+              <textarea id="c-motivo"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="c-metodologia">Que metodologia docente mais ajuda você?</label>
+              <textarea id="c-metodologia" placeholder="Ex.: aula invertida, TBL, PBL, estudo de caso, práticas..."></textarea>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
+            <button type="button" class="btn btn-primary" data-next>Próximo</button>
+          </div>
+        </div>
+
+        <!-- Passo 3 -->
+        <div class="form-step" data-form-step="3">
+          <div class="card">
+            <div class="form-group">
+              <label for="c-disc">Disciplina pretendida</label>
+              <select id="c-disc" required>
+                <option value="">Selecione...</option>
+                <option value="histologia">Histologia</option>
+                <option value="microbiologia">Microbiologia</option>
+                <option value="farmacologia">Farmacologia</option>
+              </select>
+            </div>
+            <p class="muted">As questões da prova serão carregadas no próximo passo conforme a disciplina.</p>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
+            <button type="button" id="btn-carregar-questoes" class="btn btn-primary" data-next>Próximo</button>
+          </div>
+        </div>
+
+        <!-- Passo 4 -->
+        <div class="form-step" data-form-step="4">
+          <div class="card">
+            <div class="timer">
+              <span class="pill">Tempo da prova</span>
+              <span id="clock" class="clock">--:--</span>
+              <button type="button" id="btn-iniciar" class="btn btn-primary">Iniciar</button>
+              <button type="button" id="btn-encerrar" class="btn btn-warn" disabled>Encerrar</button>
+            </div>
+            <div class="progress"><span id="progress-bar"></span></div>
+            <div class="progress-label"><span id="progress-text">0/0 respondidas</span></div>
+          </div>
+
+          <div id="questoes-box" class="questions"></div>
+
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
+            <button type="button" class="btn btn-primary" data-next>Avançar</button>
+          </div>
+        </div>
+
+        <!-- Passo 5 -->
+        <div class="form-step" data-form-step="5">
+          <div class="card">
+            <h3 style="margin-bottom:8px">Revisar e gerar</h3>
+            <p class="muted">Confira os dados. Gere o PDF e copie o Token de Avaliação (QR incluso no PDF) para enviar ao professor.</p>
+            <div id="resumo" class="sep"></div>
+            <div style="margin-top:10px">
+              <div id="token" class="token-box" style="display:none"></div>
+              <div class="actions">
+                <button type="button" class="btn btn-primary" id="btn-gerar-pdf">Gerar PDF</button>
+                <button type="button" class="btn btn-ok" id="btn-gerar-token">Gerar Token</button>
+                <button type="button" class="btn btn-ghost" id="btn-copiar-token" style="display:none">Copiar Token</button>
+              </div>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- MODO PROFESSOR -->
+    <section id="professor" style="display:none">
+      <div class="grid grid-3">
+        <div class="card">
+          <h3 style="margin-bottom:6px">Colar Tokens de Avaliação</h3>
+          <p class="muted">Cole um ou vários tokens (um por linha). Esses tokens são gerados pelo candidato.</p>
+          <textarea id="tokens-input" class="paste-box" placeholder="TOKEN1...&#10;TOKEN2..."></textarea>
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-avaliar">Avaliar</button>
+            <button class="btn btn-ghost" id="btn-limpar">Limpar</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:6px">Pesos e Tempo</h3>
+          <div class="form-group">
+            <label for="peso-obj">Peso Objetiva (0–50)</label>
+            <input id="peso-obj" type="number" min="0" max="50" value="30">
+          </div>
+          <div class="form-group">
+            <label for="peso-diss">Peso Dissertativas (0–80)</label>
+            <input id="peso-diss" type="number" min="0" max="80" value="40">
+          </div>
+          <div class="form-group">
+            <label for="peso-mot">Peso Motivação (0–20)</label>
+            <input id="peso-mot" type="number" min="0" max="20" value="10">
+          </div>
+          <div class="form-group">
+            <label for="peso-met">Peso Metodologia (0–20)</label>
+            <input id="peso-met" type="number" min="0" max="20" value="10">
+          </div>
+          <div class="form-group">
+            <label for="peso-disp">Peso Disponibilidade (0–20)</label>
+            <input id="peso-disp" type="number" min="0" max="20" value="10">
+          </div>
+          <div class="sep"></div>
+          <div class="form-group">
+            <label>Tempo da prova (minutos por disciplina)</label>
+            <div class="grid grid-3">
+              <div><small class="muted">Histologia</small><input id="tempo-histologia" type="number" min="5" max="180" value="15"></div>
+              <div><small class="muted">Microbiologia</small><input id="tempo-microbiologia" type="number" min="5" max="180" value="15"></div>
+              <div><small class="muted">Farmacologia</small><input id="tempo-farmacologia" type="number" min="5" max="180" value="15"></div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ok" id="btn-salvar-config">Salvar Config</button>
+            <button class="btn btn-ghost" id="btn-reset-config">Resetar Padrão</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:6px">Editor de Gabarito/Heurísticas</h3>
+          <p class="muted">Objetiva: marque a correta. Dissertativa: palavras-chave separadas por vírgula.</p>
+          <div id="editor-gabarito"></div>
+          <div class="actions">
+            <button class="btn btn-ok" id="btn-salvar-banco">Salvar Banco</button>
+            <button class="btn btn-ghost" id="btn-reset-banco">Banco Padrão</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3 style="margin-bottom:6px">Ranking</h3>
+        <div class="actions" style="margin-top:0">
+          <select id="disc-filtro">
+            <option value="">Todas as disciplinas</option>
+            <option value="histologia">Histologia</option>
+            <option value="microbiologia">Microbiologia</option>
+            <option value="farmacologia">Farmacologia</option>
+          </select>
+          <button class="btn btn-ok" id="btn-exportar-pdf">Exportar Relatório PDF</button>
+          <button class="btn btn-ghost" id="btn-exportar-json">Exportar JSON</button>
+          <button class="btn btn-ghost" id="btn-importar-json">Importar JSON</button>
+          <button class="btn btn-danger" id="btn-apagar-avaliacoes">Apagar Avaliações</button>
+        </div>
+        <div class="sep"></div>
+        <table class="list" id="ranking">
+          <thead>
+          <tr>
+            <th>#</th><th>Nome</th><th>Matrícula</th><th>Disciplina</th>
+            <th>Objetiva</th><th>Dissertativas</th><th>Motivação</th><th>Metodologia</th><th>Disp.</th><th>Total</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /************ QRCode.js (inline, reduzido) ************
+     * Fonte: https://github.com/davidshimjs/qrcodejs (MIT)
+     * Levemente minificado para uso embutido.
+     */
+    (function(o){function t(o){this.mode=s.MODE_8BIT_BYTE,this.data=o,this.parsedData=[];for(var t=0,e=this.data.length;t<e;t++){var i=[],r=this.data.charCodeAt(t);r>65536?(i[0]=240|r>>18&7,i[1]=128|r>>12&63,i[2]=128|r>>6&63,i[3]=128|63&r):r>2048?(i[0]=224|r>>12&15,i[1]=128|r>>6&63,i[2]=128|63&r):r>128?(i[0]=192|r>>6&31,i[1]=128|63&r):i[0]=r,this.parsedData.push(i)}this.parsedData=Array.prototype.concat.apply([],this.parsedData)}function e(o,t){this.typeNumber=o,this.errorCorrectLevel=t,this.modules=null,this.moduleCount=0,this.dataCache=null,this.dataList=[]}function i(o,t){if(void 0==o.length)throw new Error(o.length+"/"+t);for(var e=0;e<o.length&&0==o[e];)e++;this.num=o.length-e+ t;for(var i=new Array(this.num),r=0;r<this.num;r++)i[r]=o[r+e];this.offset=t}var s={};s.MODE_NUMBER=1,s.MODE_ALPHA_NUM=2,s.MODE_8BIT_BYTE=4,s.MODE_KANJI=8;var r={L:1,M:0,Q:3,H:2};var n=[0,1,2,3,4,5,6,7,8,9,10];var a=function(){var o=Array(256);for(var t=0;t<256;t++)o[t]=t<8?1<<t:o[t-4]^o[t-5]^o[t-6]^o[t-8];return{glog:function(t){for(var e=0;e<256;e++)if(o[e]==t)return e;throw new Error("glog("+t+")")},gexp:function(t){for(;t<0;)t+=255;for(;t>=256;)t-=255;return o[t]}}}(),l=a.glog,c=a.gexp;function d(o,t){for(var e=new Array(o),s=0;s<o;s++)e[s]=0;for(s=0;s<t.length;s++){var r=t[s]+e[0];e.shift(),e.push(0);if(r!=0)for(var n=0;n<o;n++)e[n]^=u[n+r]}return e}var u=function(){for(var o=new Array(256),t=0;t<256;t++)o[t]=c(t);var e=new Array(256);for(t=0;t<255;t++)e[o[t]]=t;for(var i=new Array(256),s=0;s<256;s++){for(var r=new Array(s),n=0;n<r.length;n++)r[n]=0;i[s]=r}for(s=0;s<8;s++)i[s][0]=1;return i}();e.prototype={addData:function(o){var e=new t(o);this.dataList.push(e),this.dataCache=null},isDark:function(o,t){if(void 0==this.modules[o]||void 0==this.modules[o][t])throw new Error(o+","+t);return this.modules[o][t]},getModuleCount:function(){return this.moduleCount},make:function(){this.makeImpl(!1,this.getBestMaskPattern())},makeImpl:function(o,t){this.moduleCount=4*this.typeNumber+17,this.modules=new Array(this.moduleCount);for(var e=0;e<this.moduleCount;e++){this.modules[e]=new Array(this.moduleCount);for(var i=0;i<this.moduleCount;i++)this.modules[e][i]=null}this.setupPositionProbePattern(0,0),this.setupPositionProbePattern(this.moduleCount-7,0),this.setupPositionProbePattern(0,this.moduleCount-7),this.setupTimingPattern(),this.setupTypeInfo(o,t),this.dataCache=this.createData(this.typeNumber,this.errorCorrectLevel,this.dataList),this.mapData(this.dataCache,t)},setupPositionProbePattern:function(o,t){for(var e=-1;e<=7;e++)if(!(o+e<=-1||this.moduleCount<=o+e))for(var i=-1;i<=7;i++)t+i<=-1||this.moduleCount<=t+i||(this.modules[o+e][t+i]=e>=0&&e<=6&&(0==i||6==i)||i>=0&&i<=6&&(0==e||6==e)||e>=2&&e<=4&&i>=2&&i<=4)},setupTimingPattern:function(){for(var o=8;o<this.moduleCount-8;o++)null==this.modules[o][6]&&(this.modules[o][6]=o%2==0),null==this.modules[6][o]&&(this.modules[6][o]=o%2==0)},setupTypeInfo:function(o,t){for(var e=r.L,i=this.getBCHTypeInfo(e<<3|t),s=0;s<15;s++){var n=!o&&(i>>s&1)==1; s<6?this.modules[s][8]=n:s<8?this.modules[s+1][8]=n:this.modules[this.moduleCount-15+s][8]=n;var a=!o&&(i>>s&1)==1; s<8?this.modules[8][this.moduleCount-s-1]=a:s<9?this.modules[8][15-s-1+1]=a:this.modules[8][15-s-1+1]=a}},mapData:function(o,t){for(var e=-1,i=this.moduleCount-1,s=7,r=0;i>0;i-=2){6==i&&i--;for(var n=0;n<this.moduleCount;n++){var a=e<0?this.moduleCount-1-n:n;for(var l=0;l<2;l++)if(null==this.modules[i-l][a]){var c=!1;r<o.length&&(c=(o[r]>>>s&1)==1),this.modules[i-l][a]=c,s--,-1==s&&(r++,s=7)} }e=-e}},getBestMaskPattern:function(){return 0},createData:function(o,e,s){var r=[];s.forEach(function(o){r=r.concat(o.parsedData)});var n=this.getRSBlocks(o,e),a=0;n.forEach(function(o){a+=o.totalCount});var l=new Array(a),c=0;for(var d=0;d<n.length;d++){for(var u=n[d],h=u.totalCount-u.dataCount,f=new Array(u.dataCount),p=0;p<u.dataCount;p++)f[p]=r.shift();var m=d(h,f);for(p=0;p<u.totalCount;p++)l[c++]=p<h?m[p]:f[p-h]}return l},getBCHTypeInfo:function(o){for(var t=o<<10; this.getBCHDigit(t)-this.getBCHDigit(1335)>=0;)t^=1335<<this.getBCHDigit(t)-this.getBCHDigit(1335);return o<<10|t},getBCHDigit:function(o){for(var t=0;0!=o;)t++,o>>>=1;return t}};function h(o,t){return new e(o,t)}o.QRFactory={create:h}})(window);
+
+    // ======= Estado e utilidades =======
+    const tabCand = document.getElementById('tab-candidato');
+    const tabProf = document.getElementById('tab-professor');
+    const secCand = document.getElementById('candidato');
+    const secProf = document.getElementById('professor');
+    tabCand.addEventListener('click', () => {tabCand.classList.add('active'); tabProf.classList.remove('active'); secCand.style.display='block'; secProf.style.display='none';});
+    tabProf.addEventListener('click', () => {tabProf.classList.add('active'); tabCand.classList.remove('active'); secProf.style.display='block'; secCand.style.display='none'; renderRanking(); buildGabaritoEditor(); loadConfigIntoUI();});
+
+    const steps = document.querySelectorAll('.step');
+    const formSteps = document.querySelectorAll('[data-form-step]');
+    let current = 1;
+    function showStep(n){formSteps.forEach(s=>s.classList.remove('active'));document.querySelector(`[data-form-step="${n}"]`).classList.add('active');steps.forEach(s=>s.classList.remove('active'));document.querySelector(`.step[data-step="${n}"]`).classList.add('active');current=n;if(n===5) buildResumo();}
+
+    document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click', ()=>showStep(current+1)));
+    document.querySelectorAll('[data-prev]').forEach(b=>b.addEventListener('click', ()=>showStep(current-1)));
+
+    document.querySelectorAll('input[name="outro_projeto"]').forEach(r=>{
+      r.addEventListener('change', e=>{
+        document.getElementById('c-projeto-box').style.display = e.target.value==='Sim' ? 'block':'none';
+        if(e.target.value!=='Sim') document.getElementById('c-projeto').value='';
+      });
+    });
+
+    // ======= Config e Banco padrão =======
+    const DEFAULT_CONFIG = {
+      pesos:{ objetiva:30, dissert:40, motivacao:10, metodologia:10, disponibilidade:10 },
+      tempo:{ histologia:15, microbiologia:15, farmacologia:15 }
+    };
+
+    const DEFAULT_BANK = {
+      histologia:{
+        title:'Histologia', cls:'disc-histologia',
+        items:[
+          {id:'H1', tipo:'texto', enunciado:'1. Cite dois critérios morfológicos que diferenciem epitélio de tecido conjuntivo.', heurKeywords:['epitélio','membrana basal','células justapostas','junções','matriz extracelular','fibras','vasos','inervação']},
+          {id:'H2', tipo:'objetiva', enunciado:'2. A lâmina própria está mais associada a qual estrutura?', opcoes:['Epitélio de revestimento','Cartilagem','Osso compacto','Tecido adiposo'], correta:'Epitélio de revestimento'}
+        ]
+      },
+      microbiologia:{
+        title:'Microbiologia', cls:'disc-micro',
+        items:[
+          {id:'M1', tipo:'texto', enunciado:'1. Qual a diferença entre esterilização e desinfecção?', heurKeywords:['esterilização','destruição','todas as formas de vida','esporos','desinfecção','redução','patógenos','superfícies','não necessariamente esporos']},
+          {id:'M2', tipo:'objetiva', enunciado:'2. As bactérias Gram-positivas possuem:', opcoes:['Parede espessa de peptidoglicano','Membrana externa rica em LPS','Ausência de ácido teicoico','Cápsula obrigatória'], correta:'Parede espessa de peptidoglicano'}
+        ]
+      },
+      farmacologia:{
+        title:'Farmacologia', cls:'disc-farma',
+        items:[
+          {id:'F1', tipo:'texto', enunciado:'1. Conceitue meia-vida de eliminação.', heurKeywords:['meia-vida','tempo','redução de 50%','concentração plasmática','eliminação','cinética']},
+          {id:'F2', tipo:'objetiva', enunciado:'2. Um agonista parcial:', opcoes:['Tem afinidade e alta eficácia','Tem afinidade e baixa eficácia','Não tem afinidade','É sempre antagonista'], correta:'Tem afinidade e baixa eficácia'}
+        ]
+      }
+    };
+
+    function getConfig(){return JSON.parse(localStorage.getItem('monitoria-config')||'null')||DEFAULT_CONFIG;}
+    function setConfig(cfg){localStorage.setItem('monitoria-config', JSON.stringify(cfg));}
+    function getBank(){return JSON.parse(localStorage.getItem('monitoria-banco')||'null')||DEFAULT_BANK;}
+    function setBank(b){localStorage.setItem('monitoria-banco', JSON.stringify(b));}
+
+    // ======= Banco de Questões em uso =======
+    let QUESTOES = getBank();
+
+    // ======= UI: carregar e salvar config =======
+    function loadConfigIntoUI(){
+      const cfg=getConfig();
+      document.getElementById('peso-obj').value=cfg.pesos.objetiva;
+      document.getElementById('peso-diss').value=cfg.pesos.dissert;
+      document.getElementById('peso-mot').value=cfg.pesos.motivacao;
+      document.getElementById('peso-met').value=cfg.pesos.metodologia;
+      document.getElementById('peso-disp').value=cfg.pesos.disponibilidade;
+      document.getElementById('tempo-histologia').value=cfg.tempo.histologia;
+      document.getElementById('tempo-microbiologia').value=cfg.tempo.microbiologia;
+      document.getElementById('tempo-farmacologia').value=cfg.tempo.farmacologia;
+    }
+
+    document.getElementById('btn-salvar-config').addEventListener('click', ()=>{
+      const cfg = {
+        pesos:{
+          objetiva: +document.getElementById('peso-obj').value||0,
+          dissert: +document.getElementById('peso-diss').value||0,
+          motivacao: +document.getElementById('peso-mot').value||0,
+          metodologia: +document.getElementById('peso-met').value||0,
+          disponibilidade: +document.getElementById('peso-disp').value||0
+        },
+        tempo:{
+          histologia: +document.getElementById('tempo-histologia').value||15,
+          microbiologia: +document.getElementById('tempo-microbiologia').value||15,
+          farmacologia: +document.getElementById('tempo-farmacologia').value||15
+        }
+      };
+      setConfig(cfg);
+      alert('Configuração salva.');
+    });
+
+    document.getElementById('btn-reset-config').addEventListener('click', ()=>{
+      setConfig(DEFAULT_CONFIG);
+      loadConfigIntoUI();
+      alert('Config padrão restaurada.');
+    });
+
+    // ======= Editor de gabarito/heurísticas =======
+    const editorBox = document.getElementById('editor-gabarito');
+    function buildGabaritoEditor(){
+      editorBox.innerHTML='';
+      QUESTOES = getBank();
+      Object.keys(QUESTOES).forEach(disc=>{
+        const d = QUESTOES[disc];
+        const card = document.createElement('div'); card.className='card'; card.style.marginBottom='10px';
+        card.innerHTML = `<strong>${d.title}</strong>`;
+        d.items.forEach(item=>{
+          const wrap = document.createElement('div'); wrap.className='form-group'; wrap.style.marginTop='8px';
+          if(item.tipo==='objetiva'){
+            const opts = item.opcoes.map(op=>`<label style="display:block;margin:.2rem 0;font-weight:500"><input type="radio" name="g_${disc}_${item.id}" value="${op}" ${item.correta===op?'checked':''}> ${op}</label>`).join('');
+            wrap.innerHTML = `<label>${item.enunciado}</label>${opts}`;
+          } else {
+            wrap.innerHTML = `<label>${item.enunciado} — Palavras-chave (separe por vírgula)</label>
+                              <input type="text" id="kw_${disc}_${item.id}" value="${(item.heurKeywords||[]).join(', ')}">`;
+          }
+          card.appendChild(wrap);
+        });
+        editorBox.appendChild(card);
+      });
+    }
+
+    document.getElementById('btn-salvar-banco').addEventListener('click', ()=>{
+      const bank = getBank();
+      Object.keys(bank).forEach(disc=>{
+        bank[disc].items.forEach(it=>{
+          if(it.tipo==='objetiva'){
+            const sel = document.querySelector(`input[name="g_${disc}_${it.id}"]:checked`);
+            if(sel) it.correta = sel.value;
+          } else {
+            const inp = document.getElementById(`kw_${disc}_${it.id}`);
+            if(inp) it.heurKeywords = inp.value.split(',').map(s=>s.trim()).filter(Boolean);
+          }
+        });
+      });
+      setBank(bank); QUESTOES=bank;
+      alert('Banco de questões salvo.');
+    });
+
+    document.getElementById('btn-reset-banco').addEventListener('click', ()=>{
+      setBank(DEFAULT_BANK); QUESTOES=getBank(); buildGabaritoEditor();
+      alert('Banco padrão restaurado.');
+    });
+
+    // ======= Carregar questões (candidato) =======
+    const btnCarregar = document.getElementById('btn-carregar-questoes');
+    btnCarregar.addEventListener('click', loadQuestions);
+
+    let objectiveShuffleMap = {}; // id -> shuffled options
+    function loadQuestions(){
+      const disc = document.getElementById('c-disc').value;
+      const box = document.getElementById('questoes-box');
+      box.innerHTML = '';
+      box.className = 'questions';
+      if(!disc || !QUESTOES[disc]){ box.innerHTML = '<p class="muted">Selecione uma disciplina.</p>'; return; }
+      const data = QUESTOES[disc];
+      box.classList.add(data.cls);
+      const h = document.createElement('h3'); h.textContent = `Questões de ${data.title}`; box.appendChild(h);
+
+      objectiveShuffleMap = {}; // reset
+      data.items.forEach((q)=>{
+        const qDiv = document.createElement('div'); qDiv.className='question';
+        const p = document.createElement('p'); p.textContent = q.enunciado; qDiv.appendChild(p);
+        if(q.tipo==='texto'){
+          const t = document.createElement('textarea'); t.name = q.id; t.addEventListener('input', updateProgress); qDiv.appendChild(t);
+        } else {
+          const opts = [...q.opcoes]; // shuffle
+          for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+          objectiveShuffleMap[q.id]=opts;
+          opts.forEach(opt=>{
+            const label = document.createElement('label');
+            const r = document.createElement('input'); r.type='radio'; r.name=q.id; r.value=opt; r.addEventListener('change', updateProgress);
+            label.appendChild(r); label.appendChild(document.createTextNode(' '+opt));
+            qDiv.appendChild(label);
+          });
+        }
+        box.appendChild(qDiv);
+      });
+
+      // progress init
+      totalQuestions = data.items.length;
+      answered = 0; updateProgress();
+      prepareTimerFor(disc);
+    }
+
+    // ======= Timer e progresso =======
+    const clockEl = document.getElementById('clock');
+    const btnStart = document.getElementById('btn-iniciar');
+    const btnEnd = document.getElementById('btn-encerrar');
+    const pgBar = document.getElementById('progress-bar');
+    const pgText = document.getElementById('progress-text');
+    let totalQuestions=0, answered=0;
+    let remainingSec=0, timerId=null, examLocked=false;
+
+    function formatTime(s){const m=Math.floor(s/60).toString().padStart(2,'0'); const ss=(s%60).toString().padStart(2,'0'); return `${m}:${ss}`;}
+
+    function prepareTimerFor(disc){
+      const cfg=getConfig(); remainingSec=(cfg.tempo[disc]||15)*60;
+      clockEl.textContent=formatTime(remainingSec);
+      btnStart.disabled=false; btnEnd.disabled=true; examLocked=false;
+      enableQuestions(true);
+    }
+
+    btnStart.addEventListener('click', ()=>{
+      if(timerId) clearInterval(timerId);
+      btnStart.disabled=true; btnEnd.disabled=false;
+      timerId=setInterval(()=>{
+        remainingSec--; clockEl.textContent=formatTime(remainingSec);
+        if(remainingSec<=0){ clearInterval(timerId); timerId=null; finalizeExam('Tempo esgotado. Respostas bloqueadas.'); }
+      },1000);
+    });
+
+    btnEnd.addEventListener('click', ()=>{ finalizeExam('Prova encerrada pelo candidato.'); });
+
+    function finalizeExam(msg){
+      btnEnd.disabled=true; btnStart.disabled=true; examLocked=true;
+      enableQuestions(false);
+      alert(msg);
+    }
+
+    function enableQuestions(enable){
+      document.querySelectorAll('#questoes-box textarea, #questoes-box input[type="radio"]').forEach(el=>{el.disabled=!enable;});
+    }
+
+    function updateProgress(){
+      const disc = document.getElementById('c-disc').value;
+      if(!disc||!QUESTOES[disc]) return;
+      const items=QUESTOES[disc].items;
+      answered=items.reduce((acc,q)=>{
+        if(q.tipo==='texto'){ const el=document.querySelector(`textarea[name="${q.id}"]`); return acc+(el && el.value.trim()?1:0); }
+        const r=document.querySelector(`input[name="${q.id}"]:checked`); return acc+(r?1:0);
+      },0);
+      pgText.textContent=`${answered}/${totalQuestions} respondidas`;
+      const pct = totalQuestions?Math.round((answered/totalQuestions)*100):0;
+      pgBar.style.width = pct+'%';
+    }
+
+    // ======= Coleta de dados, Resumo e Token =======
+    function getFormData(){
+      const nome = document.getElementById('c-nome').value.trim();
+      const mat = document.getElementById('c-mat').value.trim();
+      const email = document.getElementById('c-email').value.trim();
+      const disp = document.getElementById('c-disp').value;
+      const outro = (document.querySelector('input[name="outro_projeto"]:checked')||{}).value || '';
+      const proj = document.getElementById('c-projeto').value.trim();
+      const motivo = document.getElementById('c-motivo').value.trim();
+      const metodo = document.getElementById('c-metodologia').value.trim();
+      const disc = document.getElementById('c-disc').value;
+
+      const respostas = [];
+      if(disc && QUESTOES[disc]){
+        QUESTOES[disc].items.forEach(q=>{
+          let resp = '';
+          if(q.tipo==='texto'){
+            const el = document.querySelector(`textarea[name="${q.id}"]`); if(el) resp = el.value.trim();
+          } else {
+            const el = document.querySelector(`input[name="${q.id}"]:checked`); if(el) resp = el.value;
+          }
+          respostas.push({id:q.id, enunciado:q.enunciado, resposta:resp});
+        });
+      }
+
+      return {nome, matricula:mat, email, disponibilidade:disp, outro_projeto:outro, desc_projeto:proj,
+              motivo, metodologia:metodo, disciplina:disc, respostas, ts:new Date().toISOString()};
+    }
+
+    function buildResumo(){
+      const d = getFormData();
+      const el = document.getElementById('resumo');
+      el.innerHTML =
+        `<p><strong>Nome:</strong> ${d.nome||'-'}</p>
+         <p><strong>Matrícula:</strong> ${d.matricula||'-'}</p>
+         <p><strong>E-mail:</strong> ${d.email||'-'}</p>
+         <p><strong>Disciplina:</strong> ${d.disciplina||'-'}</p>
+         <p><strong>Disponibilidade:</strong> ${d.disponibilidade||'-'}</p>
+         <p><strong>Outro projeto:</strong> ${d.outro_projeto==='Sim' ? ('Sim – '+(d.desc_projeto||'-')) : 'Não'}</p>
+         <div class="sep"></div>
+         <p><strong>Motivação:</strong> ${d.motivo||'-'}</p>
+         <p><strong>Metodologia preferida:</strong> ${d.metodologia||'-'}</p>`;
+    }
+
+    function b64EncodeUnicode(str){return btoa(unescape(encodeURIComponent(str)));}
+    function b64DecodeUnicode(str){return decodeURIComponent(escape(atob(str)));}
+
+    const btnToken = document.getElementById('btn-gerar-token');
+    const tokenBox = document.getElementById('token');
+    const btnCopiarToken = document.getElementById('btn-copiar-token');
+
+    function makeToken(){
+      const d = getFormData();
+      const token = b64EncodeUnicode(JSON.stringify(d));
+      tokenBox.style.display='block';
+      tokenBox.textContent = token;
+      btnCopiarToken.style.display='inline-block';
+      localStorage.setItem('monitoria-token-'+(d.matricula||Date.now()), token);
+      return token;
+    }
+
+    btnToken.addEventListener('click', makeToken);
+
+    btnCopiarToken.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(tokenBox.textContent.trim());
+        btnCopiarToken.textContent='Copiado!';
+        setTimeout(()=>btnCopiarToken.textContent='Copiar Token',1200);
+      }catch(e){alert('Não foi possível copiar automaticamente. Selecione e copie manualmente.');}
+    });
+
+    // ======= Gerar PDF do candidato (com QR do token) =======
+    document.getElementById('btn-gerar-pdf').addEventListener('click', ()=>{
+      const { jsPDF } = window.jspdf;
+      const d = getFormData();
+
+      // Garante token
+      let token = tokenBox.textContent.trim();
+      if(!token){ token = makeToken(); }
+
+      // Gera QR usando QRFactory
+      const qrobj = window.QRFactory.create(4, 1); // typeNumber 4, ECC L
+      qrobj.addData(token); qrobj.make();
+      const size = 120; // px
+      const count = qrobj.getModuleCount();
+      const canvas = document.createElement('canvas'); canvas.width=size; canvas.height=size;
+      const ctx = canvas.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size); ctx.fillStyle='#000';
+      const tileW = size / count; const tileH = size / count;
+      for(let r=0;r<count;r++){
+        for(let c=0;c<count;c++){
+          if(qrobj.isDark(r,c)){ const w=Math.ceil((c+1)*tileW)-Math.floor(c*tileW); const h=Math.ceil((r+1)*tileH)-Math.floor(r*tileH);
+            ctx.fillRect(Math.round(c*tileW), Math.round(r*tileH), w, h);
+          }
+        }
+      }
+      const qrDataURL = canvas.toDataURL('image/png');
+
+      const doc = new jsPDF();
+      doc.setFontSize(14);
+      doc.text('Processo Seletivo de Monitoria – Ficha do Candidato', 10, 15);
+      doc.setFontSize(11);
+      let y=25;
+      const line = (t)=>{doc.text(t,10,y); y+=7;};
+      line('Nome: '+(d.nome||'-'));
+      line('Matrícula: '+(d.matricula||'-'));
+      line('E-mail: '+(d.email||'-'));
+      line('Disciplina: '+(d.disciplina||'-'));
+      line('Disponibilidade: '+(d.disponibilidade||'-'));
+      line('Outro projeto: '+(d.outro_projeto==='Sim' ? ('Sim – '+(d.desc_projeto||'-')) : 'Não'));
+      y+=3; line('Motivação:'); doc.setFontSize(10); doc.text((d.motivo||'-'), 12, y, {maxWidth:185}); y+=Math.max(7, (Math.ceil(((d.motivo||'-').length)/90))*6)+4;
+      doc.setFontSize(11); line('Metodologia preferida:'); doc.setFontSize(10); doc.text((d.metodologia||'-'), 12, y, {maxWidth:185}); y+=Math.max(7, (Math.ceil(((d.metodologia||'-').length)/90))*6)+4;
+      doc.setFontSize(11); line('Respostas da Prova:');
+      d.respostas.forEach(r=>{doc.setFontSize(10); doc.text(`• ${r.enunciado}`,12,y,{maxWidth:185}); y+=6; doc.text(`Resposta: ${r.resposta||'-'}`,14,y,{maxWidth:185}); y+=7; if(y>260){ // mantém espaço pro QR
+        doc.addPage(); y=15;
+      }});
+      // QR + token
+      doc.setFontSize(9);
+      doc.text('Token (QR):', 140, 20);
+      doc.addImage(qrDataURL, 'PNG', 140, 25, 50, 50);
+      doc.text(token.substring(0,60)+'...', 140, 80, {maxWidth:60});
+      doc.setFontSize(8);
+      doc.text('Gerado em: '+new Date().toLocaleString('pt-BR'), 140, 90);
+
+      doc.save(`monitoria-${d.matricula||'candidato'}.pdf`);
+    });
+
+    // ======= Avaliação (Modo Professor) =======
+    const tokensInput = document.getElementById('tokens-input');
+    const filtroDisc = document.getElementById('disc-filtro');
+    const tabela = document.querySelector('#ranking tbody');
+
+    function scoreTexto(resp, keywords, max){
+      if(!resp) return 0;
+      const txt = resp.toLowerCase();
+      const uniq = new Set();
+      (keywords||[]).forEach(k=>{if(txt.includes(k)) uniq.add(k);});
+      const base = Math.min(uniq.size * (max/ ((keywords||[]).length||1)), max);
+      const bonus = Math.min(Math.floor(txt.length/160), Math.floor(max*0.2)); // até 20% bônus por consistência/extensão
+      return Math.min(max, Math.round(base + bonus));
+    }
+
+    function rubricMotivacao(txt, max){
+      const k = ['ensino','aprendi','compromisso','organização','responsabilidade','liderança','monitoria','didática','tutor','paciente','equipe','aprendizagem ativa','estudo de caso','proatividade'];
+      return scoreTexto(txt,k,max);
+    }
+    function rubricMetodologia(txt, max){
+      const k = ['aula invertida','flipped','tbl','pbl','aprendizagem baseada em problemas','estudo de caso','prática','laboratório','mapas mentais','quiz','seminário','role play','peer instruction'];
+      return scoreTexto(txt,k,max);
+    }
+    function rubricDisponibilidade(val, max){
+      const map = {'4h':0,'8h':Math.round(max*0.6),'12h':max};
+      return map[val] ?? 0;
+    }
+
+    function avaliarToken(token){
+      let d;
+      try{ d = JSON.parse(b64DecodeUnicode(token.trim())); }catch(e){ return {erro:'Token inválido'}; }
+      if(!d || !d.disciplina || !QUESTOES[d.disciplina]) return {erro:'Dados incompletos/sem disciplina'};
+      const bank = QUESTOES[d.disciplina];
+      const cfg = getConfig();
+
+      // Objetiva: 2ª questão (peso configurável)
+      let objetiva=0;
+      const objItem = bank.items.find(x=>x.tipo==='objetiva');
+      const respObj = (d.respostas||[]).find(x=>x.id===objItem.id);
+      if(respObj && respObj.resposta === objItem.correta) objetiva = cfg.pesos.objetiva;
+
+      // Dissertativas: 1ª questão (metade do peso via keywords, metade via coerência global)
+      let dissert=0;
+      const dissItem = bank.items.find(x=>x.tipo==='texto');
+      const respDiss = (d.respostas||[]).find(x=>x.id===dissItem.id);
+      const kwMax = Math.round(cfg.pesos.dissert*0.5);
+      const cohMax = cfg.pesos.dissert - kwMax;
+      const d1 = scoreTexto(respDiss?.resposta||'', dissItem.heurKeywords||[], kwMax);
+      const coerencia = Math.min(cohMax, Math.floor(((d.motivo||'').length + (d.metodologia||'').length)/220));
+      dissert = Math.min(cfg.pesos.dissert, d1 + coerencia);
+
+      // Motivação, Metodologia, Disponibilidade
+      const mot = rubricMotivacao(d.motivo||'', cfg.pesos.motivacao);
+      const met = rubricMetodologia(d.metodologia||'', cfg.pesos.metodologia);
+      const disp = rubricDisponibilidade(d.disponibilidade, cfg.pesos.disponibilidade);
+
+      const total = objetiva + dissert + mot + met + disp;
+
+      return {
+        nome:d.nome||'-', matricula:d.matricula||'-', email:d.email||'',
+        disciplina:d.disciplina, objetiva, dissert, motivacao:mot, metodologia:met, disp, total,
+        disponibilidade:d.disponibilidade, outro:d.outro_projeto, projeto:d.desc_projeto||'',
+        bruto:d
+      };
+    }
+
+    document.getElementById('btn-avaliar').addEventListener('click', ()=>{
+      const linhas = tokensInput.value.split('\n').map(s=>s.trim()).filter(Boolean);
+      const resultados = [];
+      linhas.forEach(t=>{
+        const r = avaliarToken(t);
+        if(!r.erro) resultados.push(r);
+      });
+      const prev = JSON.parse(localStorage.getItem('monitoria-avaliacoes')||'[]');
+      const all = prev.concat(resultados);
+      localStorage.setItem('monitoria-avaliacoes', JSON.stringify(all));
+      renderRanking();
+      alert(`${resultados.length} token(s) avaliados e salvos.`);
+    });
+
+    document.getElementById('btn-limpar').addEventListener('click', ()=>{tokensInput.value='';});
+
+    function renderRanking(){
+      const filtro = document.getElementById('disc-filtro').value;
+      const data = JSON.parse(localStorage.getItem('monitoria-avaliacoes')||'[]')
+        .filter(r=>!filtro || r.disciplina===filtro)
+        .sort((a,b)=>b.total-a.total);
+      tabela.innerHTML='';
+      data.forEach((r,idx)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx+1}</td>
+          <td>${r.nome}</td>
+          <td>${r.matricula}</td>
+          <td>${r.disciplina}</td>
+          <td>${r.objetiva}</td>
+          <td>${r.dissert}</td>
+          <td>${r.motivacao}</td>
+          <td>${r.metodologia}</td>
+          <td>${r.disp}</td>
+          <td><strong>${r.total}</strong></td>
+        `;
+        tabela.appendChild(tr);
+      });
+    }
+    document.getElementById('disc-filtro').addEventListener('change', renderRanking);
+
+    // Exportar Relatório PDF
+    document.getElementById('btn-exportar-pdf').addEventListener('click', ()=>{
+      const { jsPDF } = window.jspdf;
+      const data = JSON.parse(localStorage.getItem('monitoria-avaliacoes')||'[]').sort((a,b)=>b.total-a.total);
+      if(!data.length){ alert('Sem avaliações.'); return; }
+      const doc = new jsPDF({unit:'pt', format:'a4'});
+      let y=50;
+      doc.setFontSize(14);
+      doc.text('Relatório de Avaliações – Monitoria', 40, y); y+=20;
+      doc.setFontSize(10);
+      const head = ['#','Nome','Matrícula','Disciplina','Obj.','Diss.','Mot.','Met.','Disp.','Total'];
+      let x=40;
+      head.forEach(h=>{doc.text(h,x,y); x+= (h==='Nome'?160:(h==='Matrícula'?90: (h==='Disciplina'?90:40)));});
+      y+=12; doc.setDrawColor(220); doc.line(40,y,555,y); y+=8;
+
+      data.forEach((r,idx)=>{
+        x=40;
+        const cols = [String(idx+1), r.nome, r.matricula, r.disciplina, r.objetiva, r.dissert, r.motivacao, r.metodologia, r.disp, r.total];
+        cols.forEach((c,i)=>{
+          doc.text(String(c), x, y);
+          x+= (i===1?160:(i===2?90:(i===3?90:40)));
+        });
+        y+=14;
+        if(y>760){ doc.addPage(); y=50; }
+      });
+
+      doc.save('relatorio-monitoria.pdf');
+    });
+
+    // Exportar / Importar JSON
+    document.getElementById('btn-exportar-json').addEventListener('click', ()=>{
+      const data = localStorage.getItem('monitoria-avaliacoes')||'[]';
+      const blob = new Blob([data], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href=url; a.download='avaliacoes-monitoria.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('btn-importar-json').addEventListener('click', ()=>{
+      const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+      inp.onchange = e=>{
+        const file = e.target.files[0]; if(!file) return;
+        const fr = new FileReader();
+        fr.onload = ()=>{
+          try{
+            const arr = JSON.parse(fr.result);
+            if(Array.isArray(arr)){
+              localStorage.setItem('monitoria-avaliacoes', JSON.stringify(arr));
+              renderRanking();
+            } else alert('Arquivo inválido.');
+          }catch(e){ alert('JSON inválido.'); }
+        };
+        fr.readAsText(file, 'utf-8');
+      };
+      inp.click();
+    });
+
+    document.getElementById('btn-apagar-avaliacoes').addEventListener('click', ()=>{
+      if(confirm('Apagar todas as avaliações salvas neste navegador?')){ localStorage.removeItem('monitoria-avaliacoes'); renderRanking(); }
+    });
+
+    // Carrega ranking no início
+    window.addEventListener('load', ()=>{renderRanking();});
+
+    // ======= Candidato: timer/progresso reset ao carregar questões =======
+    // Botões já conectados acima (btn-iniciar / btn-encerrar)
+  </script>
+</body>
+</html>
