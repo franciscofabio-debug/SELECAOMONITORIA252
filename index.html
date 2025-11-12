@@ -71,9 +71,7 @@
             margin-right: 5px;
         }
         
-        /* A MÁGICA ESTÁ AQUI: 
-          Por padrão, os blocos de perguntas ficam escondidos.
-        */
+        /* Blocos de perguntas escondidos por padrão */
         .questions-block {
             display: none; 
             border-top: 2px dashed #0056b3;
@@ -96,7 +94,9 @@
             display: block;
             margin-bottom: 5px;
         }
-        button {
+        
+        /* Botão principal (Finalizar) */
+        button[type="submit"] {
             display: block;
             width: 100%;
             padding: 15px;
@@ -109,9 +109,29 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #0056b3;
         }
+
+        /* --- MUDANÇA (CSS) ---
+           Estilo para o novo botão "Siga em frente" 
+        */
+        #mostrar-questoes {
+            width: auto;
+            padding: 10px 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #fff;
+            background-color: #28a745; /* Verde */
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #mostrar-questoes:hover {
+            background-color: #218838;
+        }
+
     </style>
 </head>
 <body>
@@ -188,7 +208,7 @@
                 <legend>Parte 3: Prova de Conhecimento</legend>
 
                 <div class="form-group">
-                    <label for="disciplina-choice">Escolha a disciplina para a qual deseja concorrer:</label>
+                    <label for="disciplina-choice">1. Escolha a disciplina para a qual deseja concorrer:</label>
                     <select id="disciplina-choice" name="disciplina_escolhida">
                         <option value="">-- Selecione uma disciplina --</option>
                         <option value="histologia">Histologia</option>
@@ -196,6 +216,10 @@
                         <option value="farmacologia">Farmacologia</option>
                     </select>
                 </div>
+
+                <label>2. Após selecionar, clique aqui para carregar as perguntas:</label>
+                <button type="button" id="mostrar-questoes">Carregar Perguntas</button>
+
 
                 <div id="questoes-histologia" class="questions-block">
                     <h3>Questões de Histologia</h3>
@@ -264,7 +288,6 @@
 
                 <div id="questoes-microbiologia" class="questions-block">
                     <h3>Questões de Microbiologia</h3>
-
                     <div class="question">
                         <p>1. A principal diferença entre células procarióticas (bactérias) e eucarióticas (fungos, protozoários) é:</p>
                         <label><input type="radio" name="m1" value="a"> A) A presença de ribossomos na eucariótica.</label>
@@ -329,7 +352,6 @@
 
                 <div id="questoes-farmacologia" class="questions-block">
                     <h3>Questões de Farmacologia</h3>
-
                     <div class="question">
                         <p>1. O que a Farmacocinética estuda?</p>
                         <label><input type="radio" name="f1" value="a"> A) O que o fármaco faz com o corpo (mecanismo de ação).</label>
@@ -338,4 +360,205 @@
                     </div>
                     <div class="question">
                         <p>2. O que a Farmacodinâmica estuda?</p>
-                        <label><input type="radio" name="f2" value="a"> A
+                        <label><input type="radio" name="f2" value="a"> A) O que o fármaco faz com o corpo (mecanismo de ação, efeitos).</label>
+                        <label><input type="radio" name="f2" value="b"> B) O caminho do fármaco desde a administração até a eliminação.</label>
+                        <label><input type="radio" name="f2" value="c"> C) A toxicidade dos fármacos.</label>
+                    </div>
+                    <div class="question">
+                        <p>3. Qual é o principal órgão responsável pelo metabolismo (biotransformação) da maioria dos fármacos?</p>
+                        <label><input type="radio" name="f3" value="a"> A) Rins</label>
+                        <label><input type="radio" name="f3" value="b"> B) Pulmões</label>
+                        <label><input type="radio" name="f3" value="c"> C) Fígado</label>
+                    </div>
+                    <div class="question">
+                        <p>4. Qual é o principal órgão responsável pela excreção da maioria dos fármacos?</p>
+                        <label><input type="radio" name="f4" value="a"> A) Fígado</label>
+                        <label><input type="radio" name="f4" value="b"> B) Rins</label>
+                        <label><input type="radio" name="f4" value="c"> C) Pele</label>
+                    </div>
+                    <div class="question">
+                        <p>5. Um fármaco que se liga a um receptor e o ativa, produzindo uma resposta celular, é chamado de:</p>
+                        <label><input type="radio" name="f5" value="a"> A) Agonista</label>
+                        <label><input type="radio" name="f5" value="b"> B) Antagonista</label>
+                        <label><input type="radio" name="f5" value="c"> C) Enzima</label>
+                    </div>
+                    <div class="question">
+                        <p>6. Um fármaco que se liga a um receptor, mas não o ativa (bloqueando a ação de um agonista), é chamado de:</p>
+                        <label><input type="radio" name="f6" value="a"> A) Agonista</label>
+                        <label><input type="radio" name="f6" value="b"> B) Antagonista</label>
+                        <label><input type="radio" name="f6" value="c"> C) Substrato</label>
+                    </div>
+                    <div class="question">
+                        <p>7. O termo "via de administração" refere-se a:</p>
+                        <label><input type="radio" name="f7" value="a"> A) A rapidez com que o fármaco funciona.</label>
+                        <label><input type="radio" name="f7" value="b"> B) O local do corpo onde o fármaco atua.</label>
+                        <label><input type="radio" name="f7" value="c"> C) O modo como o fármaco é introduzido no corpo (ex: oral, intravenosa, tópica).</label>
+                    </div>
+                    <div class="question">
+                        <p>8. O que significa "meia-vida" (T½) de um fármaco?</p>
+                        <label><input type="radio" name="f8" value="a"> A) O tempo necessário para o fármaco fazer efeito.</label>
+                        <label><input type="radio" name="f8" value="b"> B) O tempo necessário para que a concentração do fármaco no plasma caia pela metade.</label>
+                        <label><input type="radio" name="f8" value="c"> C) A metade da dose máxima permitida.</label>
+                    </div>
+                    <div class="question">
+                        <p>9. Fármacos antipiréticos (ou antitérmicos) são usados para:</p>
+                        <label><input type="radio" name="f9" value="a"> A) Combater infecções bacterianas.</label>
+                        <label><input type="radio" name="f9" value="b"> B) Reduzir a febre.</label>
+                        <label><input type="radio" name="f9" value="c"> C) Aliviar a dor.</label>
+                    </div>
+                    <div class="question">
+                        <p>10. Fármacos analgésicos são usados para:</p>
+                        <label><input type="radio" name="f10" value="a"> A) Reduzir a inflamação.</label>
+                        <label><input type="radio" name="f10" value="b"> B) Induzir o sono.</label>
+                        <label><input type="radio" name="f10" value="c"> C) Aliviar a dor.</label>
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <button type="submit" id="gerar-pdf">Finalizar e Gerar PDF</button>
+
+        </form>
+    </div>
+
+    <script>
+        // Espera o documento carregar completamente
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const form = document.getElementById("monitoria-form");
+            const selectDisciplina = document.getElementById("disciplina-choice");
+
+            // --- MUDANÇA (JAVASCRIPT) ---
+            // Encontramos o novo botão que você sugeriu
+            const btnMostrarQuestoes = document.getElementById("mostrar-questoes");
+
+            // 1. LÓGICA DE MOSTRAR PERGUNTAS (AGORA NO BOTÃO)
+            btnMostrarQuestoes.addEventListener("click", function() {
+                
+                // Pega o valor ATUAL do dropdown
+                const selectedValue = selectDisciplina.value;
+
+                if (!selectedValue) {
+                    alert("Por favor, selecione uma disciplina primeiro.");
+                    return;
+                }
+
+                // 1. Esconde todos os blocos de questões
+                document.querySelectorAll(".questions-block").forEach(function(block) {
+                    block.style.display = "none";
+                });
+                
+                // 2. Mostra o bloco selecionado
+                const blockId = "questoes-" + selectedValue; 
+                const blockToShow = document.getElementById(blockId);
+                
+                if (blockToShow) {
+                    blockToShow.style.display = "block";
+                }
+            });
+            
+
+            // 2. LÓGICA DE GERAR O PDF (PERMANECE IGUAL)
+            form.addEventListener("submit", function(event) {
+                event.preventDefault(); 
+                
+                if (!selectDisciplina.value) {
+                    alert("Por favor, escolha uma disciplina na Parte 3 e clique em 'Carregar Perguntas' antes de finalizar.");
+                    selectDisciplina.focus();
+                    return;
+                }
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    let y = 15; 
+                    const margin = 10;
+                    const maxWidth = doc.internal.pageSize.getWidth() - (margin * 2);
+
+                    // Funções Auxiliares
+                    function addSection(title) {
+                        y += (y === 15) ? 0 : 10; 
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(14);
+                        doc.text(title, margin, y);
+                        y += 8;
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(12);
+                    }
+                    function addField(label, value) {
+                        if (!value || value.trim() === "") { value = "Não preenchido"; }
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.setFont("helvetica", "bold");
+                        doc.text(label, margin, y);
+                        y += 6;
+                        doc.setFont("helvetica", "normal");
+                        const lines = doc.splitTextToSize(value, maxWidth); 
+                        doc.text(lines, margin, y);
+                        y += (lines.length * 6) + 4; 
+                    }
+                    function getRadioValue(name) {
+                        const radio = document.querySelector(`input[name="${name}"]:checked`);
+                        return radio ? radio.value : "Não respondido";
+                    }
+
+                    // Construindo o PDF
+                    doc.setFontSize(18);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Ficha de Inscrição - Monitoria", doc.internal.pageSize.getWidth() / 2, y, { align: "center" });
+                    y += 10;
+
+                    // Parte 1
+                    addSection("Parte 1: Informações Gerais");
+                    addField("Nome Completo:", document.getElementById("nome").value);
+                    addField("Matrícula:", document.getElementById("matricula").value);
+                    addField("Disponibilidade:", document.getElementById("disponibilidade").value);
+                    addField("Participa de outro projeto?", getRadioValue("outro_projeto"));
+                    addField("Inscrito em outra monitoria?", getRadioValue("outra_monitoria"));
+
+                    // Parte 2
+                    addSection("Parte 2: Motivação e Interesse");
+                    addField("Motivo da escolha:", document.getElementById("motivo").value);
+                    addField("Metodologia interessante:", document.getElementById("metodologia").value);
+                    addField("Identidade com a disciplina:", getRadioValue("identidade"));
+
+                    // Parte 3
+                    const disciplina = selectDisciplina.options[selectDisciplina.selectedIndex].text;
+                    addSection(`Parte 3: Prova de Conhecimento (${disciplina})`);
+                    
+                    const disciplinaSigla = selectDisciplina.value.charAt(0); // 'h', 'm' ou 'f'
+                    
+                    for (let i = 1; i <= 10; i++) {
+                        const questaoLabel = `Questão ${i}:`;
+                        let respostaTexto = "Não respondido";
+                        const radioInput = document.querySelector(`input[name="${disciplinaSigla + i}"]:checked`);
+                        
+                        if (radioInput) {
+                            respostaTexto = radioInput.parentElement.textContent.trim();
+                        }
+                        addField(questaoLabel, respostaTexto);
+                        y -= 2; 
+                    }
+
+                    // Assinatura
+                    y += 30; 
+                    if (y > 270) { doc.addPage(); y = 20; }
+                    doc.setFontSize(12);
+                    doc.text("________________________________________", margin, y);
+                    y += 7;
+                    doc.text("Assinatura do Aluno", margin, y);
+
+                    // Download
+                    doc.save(`Ficha_Monitoria_${document.getElementById("nome").value.replace(/ /g, '_')}.pdf`);
+                
+                } catch (e) {
+                    console.error("Erro ao gerar PDF:", e);
+                    alert("Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes (Pressione F12).");
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
