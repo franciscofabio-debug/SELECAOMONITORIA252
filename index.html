@@ -179,7 +179,7 @@
 
         <div class="actions">
           <button type="button" class="btn btn-ghost" data-prev>Voltar</button>
-          <!-- Importante: sem data-next; handler explícito no JS -->
+          <!-- Avançar com handler explícito (corrigido) -->
           <button type="button" id="btn-avancar-final" class="btn btn-primary" disabled>Avançar</button>
         </div>
       </section>
@@ -220,7 +220,6 @@
       document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
       current=n;
       if(n===5){ buildResumo(); }
-      // rola para o topo para evitar confusão em mobile
       window.scrollTo({top:0, behavior:'smooth'});
     }
     document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click', ()=>showStep(current+1)));
@@ -234,7 +233,7 @@
       });
     });
 
-    // ===== Banco de Questões Mais Fáceis (10 por disciplina, 100% objetivas) =====
+    // ===== Banco de Questões (fáceis, 100% objetivas) =====
     const BANK = {
       histologia:{
         title:'Histologia', cls:'disc-histologia',
@@ -349,7 +348,7 @@
       timerId=setInterval(()=>{
         remainingSec--; tempoGastoSeg++;
         clockEl.textContent=formatTime(remainingSec);
-        if(remainingSec<=0){ stopTimer(); finalizeExam('Tempo esgotado. Respostas bloqueadas.'); }
+        if(remainingSec<=0){ stopTimer(); finalizeExam('Tempo esgotado. Prova encerrada automaticamente.'); }
       },1000);
     });
     btnEnd.addEventListener('click', ()=>{ stopTimer(); finalizeExam('Prova encerrada.'); });
@@ -357,7 +356,7 @@
     function finalizeExam(msg){
       btnEnd.disabled=true; btnStart.disabled=true;
       enableQuestions(false);
-      provaEncerrada = true;           // marca encerramento
+      provaEncerrada = true;            // marca encerramento
       btnAvancarFinal.disabled = false; // libera botão avançar
       alert(msg);
     }
@@ -370,9 +369,15 @@
       pgText.textContent=`${answered}/${totalQuestions} respondidas`;
       const pct = totalQuestions?Math.round((answered/totalQuestions)*100):0;
       pgBar.style.width = pct+'%';
+
+      // <<< CORREÇÃO >>> Encerrar automaticamente ao responder tudo
+      if(totalQuestions>0 && answered===totalQuestions && !provaEncerrada){
+        stopTimer();
+        finalizeExam('Você respondeu todas as questões. Prova encerrada automaticamente.');
+      }
     }
 
-    // Handler explícito para o botão "Avançar" do passo 4
+    // Handler explícito para o botão "Avançar" do passo 4 (corrigido)
     btnAvancarFinal.addEventListener('click', ()=>{
       if(!provaEncerrada){
         alert('Finalize a prova para avançar.');
